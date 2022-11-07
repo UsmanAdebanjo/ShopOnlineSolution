@@ -44,8 +44,26 @@ namespace ShopOnline.Web.Services
         {
             try
             {
-                var products = await _httpClient.GetFromJsonAsync<IEnumerable<ProductDto>>("api/produt");
-                return products;
+                var response = await _httpClient.GetAsync("api/produt");
+                if (response.IsSuccessStatusCode)
+                {
+                    if(response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                    {
+                        return default(IEnumerable<ProductDto>);
+                    }
+                    else
+                    {
+                        return await response.Content.ReadFromJsonAsync<IEnumerable<ProductDto>>();
+                    }
+                    
+                }
+                else
+                {
+                    var message = await response.Content.ReadAsStringAsync();
+                    throw new Exception(message);
+                }
+
+               
             }
             catch (Exception)
             {
